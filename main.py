@@ -97,12 +97,12 @@ def fetch_rss(source):
             title_el = item.find('title') or item.find('atom:title', ns)
             desc_el = item.find('description') or item.find('atom:summary', ns) or item.find('atom:content', ns)
             link_el = item.find('link') or item.find('atom:link', ns)
-            if title_el is not None:
-                title = re.sub('<[^>]+>', '', title_el.text or '')
-            if desc_el is not None:
-                desc = re.sub('<[^>]+>', '', desc_el.text or '')
+            if title_el is not None and title_el.text:
+                title = re.sub('<[^>]+>', '', title_el.text)
+            if desc_el is not None and desc_el.text:
+                desc = re.sub('<[^>]+>', '', desc_el.text)
             if link_el is not None:
-                link = link_el.text or link_el.get('href', '')
+                link = link_el.text or link_el.get('href', '') or ''
             if has_keyword(title) or has_keyword(desc):
                 add_post(source['name'], title, desc, link)
                 count += 1
@@ -112,7 +112,6 @@ def fetch_rss(source):
         print(f"[RSS ERROR] {source['name']}: {e}")
 
 def monitor_loop():
-    global monitoring_active
     print("[MONITOR] Запуск RSS мониторинга...")
     while True:
         if monitoring_active:
@@ -120,7 +119,7 @@ def monitor_loop():
                 fetch_rss(source)
                 time.sleep(2)
             print(f"[MONITOR] Цикл завершён. Всего постов: {len(posts)}")
-        time.sleep(300)  # каждые 5 минут
+        time.sleep(300)
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -134,6 +133,8 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        global monitoring_active, posts, stats, seen_urls
+
         if self.path == '/':
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
@@ -165,7 +166,6 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == '/api/stats':
             self.wfile.write(json.dumps(stats).encode('utf-8'))
         elif self.path == '/api/status':
-            global monitoring_active
             status = {
                 'active': monitoring_active,
                 'posts_count': len(posts),
@@ -174,11 +174,9 @@ class Handler(BaseHTTPRequestHandler):
             }
             self.wfile.write(json.dumps(status).encode('utf-8'))
         elif self.path == '/api/start':
-            global monitoring_active
             monitoring_active = True
             self.wfile.write(json.dumps({'status': 'started'}).encode('utf-8'))
         elif self.path == '/api/stop':
-            global monitoring_active
             monitoring_active = False
             self.wfile.write(json.dumps({'status': 'stopped'}).encode('utf-8'))
         else:
