@@ -165,6 +165,7 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == '/api/stats':
             self.wfile.write(json.dumps(stats).encode('utf-8'))
         elif self.path == '/api/status':
+            global monitoring_active
             status = {
                 'active': monitoring_active,
                 'posts_count': len(posts),
@@ -173,9 +174,11 @@ class Handler(BaseHTTPRequestHandler):
             }
             self.wfile.write(json.dumps(status).encode('utf-8'))
         elif self.path == '/api/start':
+            global monitoring_active
             monitoring_active = True
             self.wfile.write(json.dumps({'status': 'started'}).encode('utf-8'))
         elif self.path == '/api/stop':
+            global monitoring_active
             monitoring_active = False
             self.wfile.write(json.dumps({'status': 'stopped'}).encode('utf-8'))
         else:
