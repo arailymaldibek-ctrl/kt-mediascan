@@ -3,851 +3,811 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KT MediaScan — АО Казахтелеком</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>KT MediaScan — Мониторинг упоминаний</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0e1a;--bg1:#0f1525;--bg2:#151d30;--bg3:#1c2640;--bg4:#243050;
-  --kt:#0060df;--kt2:#0080ff;--kt3:rgba(0,128,255,.12);
-  --tx:#e8edf5;--tx2:#8a9bb8;--tx3:#4a5878;
-  --bd:rgba(255,255,255,.06);--bd2:rgba(255,255,255,.1);
-  --red:#e53935;--red-bg:rgba(229,57,53,.12);--red-tx:#ff6b6b;
-  --amber:#f59e0b;--amber-bg:rgba(245,158,11,.12);--amber-tx:#fbbf24;
-  --green:#10b981;--green-bg:rgba(16,185,129,.12);--green-tx:#34d399;
-  --r:8px;--r2:12px;
-}
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--tx);font-size:13px;line-height:1.5;min-height:100vh}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg1)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
-/* NAV */
-.nav{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg1);border-right:1px solid var(--bd);display:flex;flex-direction:column;z-index:200;overflow-y:auto}
-.nav-logo{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bd)}
-.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#003ea6,#0080ff);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
-.ns{font-size:9px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;padding:12px 14px 4px}
-.ni{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;color:var(--tx2);font-size:12px;font-weight:500;transition:all .12s;border-left:2px solid transparent;background:none;border-top:none;border-right:none;border-bottom:none;width:100%;text-align:left;font-family:inherit}
-.ni:hover{background:rgba(255,255,255,.04);color:var(--tx)}
-.ni.on{background:var(--kt3);color:var(--tx);border-left-color:var(--kt2)}
-.nbadge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600}
-.nbadge.red{background:var(--red-bg);color:var(--red-tx)}
-.nbadge.blue{background:var(--kt3);color:var(--kt2)}
-.nav-foot{margin-top:auto;padding:12px 14px;border-top:1px solid var(--bd)}
-.live{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid}
-.live.on{background:var(--green-bg);border-color:rgba(16,185,129,.2);color:var(--green-tx)}
-.live.off{background:var(--bg3);border-color:var(--bd2);color:var(--tx3)}
-.ldot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.ldot.on{background:var(--green);animation:blink 2s infinite}
-.ldot.off{background:var(--tx3)}
+  :root {
+    --bg: #0a0e17;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --border: #1e2d45;
+    --accent: #00c8ff;
+    --accent2: #0077ff;
+    --neg: #ff4757;
+    --pos: #2ed573;
+    --neu: #ffa502;
+    --text: #e2e8f0;
+    --text2: #64748b;
+    --text3: #94a3b8;
+  }
 
-/* TOPBAR */
-.topbar{position:fixed;left:220px;right:0;top:0;height:52px;background:var(--bg1);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;padding:0 18px;z-index:190}
-.ptabs{display:flex;gap:2px;background:var(--bg3);padding:3px;border-radius:var(--r);border:1px solid var(--bd)}
-.pt{padding:4px 10px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;color:var(--tx3);border:none;background:transparent;font-family:inherit;transition:all .12s}
-.pt.on{background:var(--kt);color:#fff}
-.tbr{margin-left:auto;display:flex;gap:7px;align-items:center}
-.btn{font-size:11px;font-weight:600;padding:6px 12px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--bg4);cursor:pointer;color:var(--tx2);font-family:inherit;transition:all .12s;white-space:nowrap}
-.btn:hover{background:var(--bg3);color:var(--tx)}
-.btn.p{background:var(--kt);color:#fff;border-color:var(--kt)}
-.btn.p:hover{background:var(--kt2)}
-.btn.d{background:var(--red-bg);color:var(--red-tx);border-color:rgba(229,57,53,.2)}
-.srch{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:5px 10px;width:180px}
-.srch input{background:none;border:none;outline:none;color:var(--tx);font-size:12px;font-family:inherit;width:100%}
-.srch input::placeholder{color:var(--tx3)}
-.ptitle{font-size:13px;font-weight:700;flex-shrink:0}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* CONTENT */
-.content{margin-left:220px;margin-top:52px;padding:18px;min-height:calc(100vh - 52px)}
-.sec{display:none;flex-direction:column;gap:14px}
-.sec.on{display:flex}
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+  }
 
-/* CARDS */
-.row5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:14px}
-.clbl{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.cval{font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1}
-.csub{font-size:10px;margin-top:5px;color:var(--tx3)}
-.csub.up{color:var(--green-tx)}.csub.dn{color:var(--red-tx)}
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
 
-/* PANEL */
-.panel{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden}
-.ph{padding:11px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.pht{font-size:12px;font-weight:600}
-.par{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-.chip{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--tx2);font-family:inherit;transition:all .12s}
-.chip.on{background:var(--kt);color:#fff;border-color:var(--kt)}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.gm{display:grid;grid-template-columns:1fr 290px;gap:12px}
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
 
-/* POSTS */
-.post{padding:12px 14px;border-bottom:1px solid var(--bd);display:flex;gap:10px;animation:fadeIn .3s ease}
-.post:hover{background:rgba(255,255,255,.02)}
-.post.neg{border-left:3px solid var(--red);padding-left:11px}
-.post.pos{border-left:3px solid var(--green);padding-left:11px}
-.post.neu{border-left:3px solid var(--tx3);padding-left:11px}
-.pico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
-.s-telegram{background:rgba(0,128,255,.12);color:#0080ff}
-.s-instagram{background:rgba(249,168,37,.12);color:#f9a825}
-.s-other{background:var(--bg4);color:var(--tx2)}
-.pbody{flex:1;min-width:0}
-.phead{display:flex;align-items:center;gap:5px;margin-bottom:4px;flex-wrap:wrap}
-.pauth{font-size:12px;font-weight:600}
-.ptime{font-size:10px;color:var(--tx3);margin-left:auto;white-space:nowrap}
-.ptxt{font-size:12px;line-height:1.6;color:var(--tx2);margin-bottom:5px}
-.pfoot{display:flex;align-items:center;gap:7px}
-.pstat{font-size:10px;color:var(--tx3)}
-.pkw{font-size:10px;font-weight:500;padding:2px 6px;border-radius:4px;background:var(--kt3);color:var(--kt2);margin-left:auto}
-.tbadge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}
-.tbadge.neg{background:var(--red-bg);color:var(--red-tx)}
-.tbadge.pos{background:var(--green-bg);color:var(--green-tx)}
-.tbadge.neu{background:rgba(255,255,255,.05);color:var(--tx2)}
-.sbadge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px}
-.pright{width:100px;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
-.ublk{padding:5px 7px;border-radius:var(--r);border:1px solid}
-.ublk.r{background:var(--red-bg);border-color:rgba(229,57,53,.2)}
-.ublk.a{background:var(--amber-bg);border-color:rgba(245,158,11,.2)}
-.ublk.g{background:var(--green-bg);border-color:rgba(16,185,129,.2)}
-.ublk.n{background:var(--bg3);border-color:var(--bd2)}
-.ulbl{font-size:9px;font-weight:700}
-.ulbl.r{color:var(--red-tx)}.ulbl.a{color:var(--amber-tx)}.ulbl.g{color:var(--green-tx)}.ulbl.n{color:var(--tx2)}
-.usub{font-size:9px;color:var(--tx3);margin-top:1px}
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
 
-/* BARS */
-.bars{padding:10px 14px;display:flex;flex-direction:column;gap:8px}
-.br{display:flex;align-items:center;gap:8px}
-.brl{font-size:11px;color:var(--tx2);width:110px;flex-shrink:0;text-align:right}
-.brt{flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
-.brf{height:100%;border-radius:3px}
-.brv{font-size:11px;font-weight:600;width:32px;text-align:right;flex-shrink:0;color:var(--tx2)}
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
 
-/* SLA */
-.slas{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.sla{display:flex;flex-direction:column;gap:3px}
-.slah{display:flex;justify-content:space-between;font-size:10px}
-.slat{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
-.slaf{height:100%;border-radius:2px}
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
 
-/* TABLE */
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;padding:7px 12px;border-bottom:1px solid var(--bd);text-align:left}
-.tbl td{padding:8px 12px;border-bottom:1px solid var(--bd);font-size:12px}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:rgba(255,255,255,.015)}
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text2);
+  }
 
-/* PAGINATION */
-.pag{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-top:1px solid var(--bd)}
-.pagi{font-size:10px;color:var(--tx3)}
-.pagb{display:flex;gap:3px}
-.pb{padding:3px 8px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--tx2);font-family:inherit}
-.pb.on{background:var(--kt);color:#fff;border-color:var(--kt)}
-.pb:disabled{opacity:.4;cursor:not-allowed}
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--pos);
+    animation: pulse 2s infinite;
+  }
 
-/* SETUP */
-.scard{background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:22px;max-width:560px;margin:0 auto}
-.flbl{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px}
-.finp{width:100%;padding:8px 11px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--bg3);color:var(--tx);font-family:inherit;font-size:12px;outline:none;margin-bottom:10px;color-scheme:dark}
-.finp:focus{border-color:var(--kt2)}
-.finp.mono{font-family:monospace;font-size:11px}
-.tags{display:flex;flex-wrap:wrap;gap:4px;min-height:30px;padding:5px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);margin-bottom:10px}
-.tag{display:flex;align-items:center;gap:3px;padding:2px 7px;border-radius:3px;font-size:11px;font-weight:500;background:var(--kt3);color:var(--kt2);border:1px solid rgba(0,128,255,.2)}
-.tagrm{cursor:pointer;opacity:.6;font-size:12px;background:none;border:none;color:inherit;padding:0;line-height:1}
-.tagrm:hover{opacity:1}
-.sbar{display:flex;align-items:center;gap:7px;padding:8px 10px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);margin-bottom:12px;font-size:11px}
-.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.sdot.ok{background:var(--green);animation:blink 2s infinite}
-.sdot.err{background:var(--red)}.sdot.wait{background:var(--amber);animation:blink .8s infinite}
-.log{background:var(--bg);border:1px solid var(--bd2);border-radius:var(--r);padding:9px 11px;font-size:10px;font-family:monospace;color:var(--green-tx);max-height:150px;overflow-y:auto;line-height:1.8;white-space:pre-wrap}
-.chrow{display:flex;align-items:center;gap:7px;padding:6px 9px;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);margin-bottom:5px;font-size:11px}
-.chrm{margin-left:auto;cursor:pointer;color:var(--red-tx);opacity:.6;background:none;border:none;font-family:inherit;font-size:11px}
-.chrm:hover{opacity:1}
+  .btn {
+    padding: 6px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
 
-/* MODAL */
-.mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.mov.on{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--bd2);border-radius:14px;padding:22px;width:500px;max-width:94vw}
-.mta{width:100%;min-height:80px;padding:9px 11px;border:1px solid var(--bd2);border-radius:var(--r);background:var(--bg3);color:var(--tx);font-family:inherit;font-size:12px;outline:none;resize:vertical}
-.mta:focus{border-color:var(--kt2)}
-.mft{display:flex;gap:7px;justify-content:flex-end;margin-top:12px}
+  .btn-primary {
+    background: var(--accent2);
+    color: white;
+  }
 
-/* WORD CLOUD */
-.wc{padding:10px;display:flex;flex-wrap:wrap;gap:5px;min-height:70px;align-items:center}
-.wctag{padding:3px 9px;border-radius:4px;font-weight:600;cursor:pointer;border:1px solid}
+  .btn-primary:hover { background: #0066dd; }
 
-/* TOAST */
-.toast{position:fixed;bottom:18px;right:18px;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none;border:1px solid}
-.toast.on{transform:translateY(0);opacity:1}
-.toast.s{background:var(--bg2);border-color:rgba(16,185,129,.3);color:var(--green-tx)}
-.toast.e{background:var(--bg2);border-color:rgba(229,57,53,.3);color:var(--red-tx)}
-.toast.i{background:var(--bg2);border-color:rgba(0,128,255,.3);color:var(--kt2)}
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text3);
+  }
 
-/* CHART WRAP */
-.cw{padding:12px;position:relative}
+  .btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 
-@media(max-width:860px){.nav{display:none}.topbar,.content{margin-left:0}.row5,.row4{grid-template-columns:repeat(2,1fr)}.g2,.gm{grid-template-columns:1fr}}
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text2);
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  .nav-item.active {
+    background: var(--bg3);
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+
+  .nav-section {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text2);
+    padding: 16px 20px 6px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .badge {
+    margin-left: auto;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .badge.neg { background: rgba(255,71,87,0.15); border-color: var(--neg); color: var(--neg); }
+
+  .main {
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.total::before { background: var(--accent); }
+  .stat-card.neg::before { background: var(--neg); }
+  .stat-card.pos::before { background: var(--pos); }
+  .stat-card.neu::before { background: var(--neu); }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1;
+  }
+
+  .stat-card.total .stat-value { color: var(--accent); }
+  .stat-card.neg .stat-value { color: var(--neg); }
+  .stat-card.pos .stat-value { color: var(--pos); }
+  .stat-card.neu .stat-value { color: var(--neu); }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 6px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,200,255,0.08);
+  }
+
+  .filter-btn.neg.active { border-color: var(--neg); color: var(--neg); background: rgba(255,71,87,0.08); }
+  .filter-btn.pos.active { border-color: var(--pos); color: var(--pos); background: rgba(46,213,115,0.08); }
+  .filter-btn.neu.active { border-color: var(--neu); color: var(--neu); background: rgba(255,165,2,0.08); }
+
+  .posts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .post-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+
+  .post-card:hover {
+    border-color: var(--accent);
+    background: var(--bg3);
+  }
+
+  .post-card.negative { border-left-color: var(--neg); }
+  .post-card.positive { border-left-color: var(--pos); }
+  .post-card.neutral { border-left-color: var(--neu); }
+
+  .post-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .post-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .post-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .post-title a:hover { color: var(--accent); }
+
+  .tone-badge {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tone-badge.negative { background: rgba(255,71,87,0.15); color: var(--neg); }
+  .tone-badge.positive { background: rgba(46,213,115,0.15); color: var(--pos); }
+  .tone-badge.neutral { background: rgba(255,165,2,0.15); color: var(--neu); }
+
+  .post-text {
+    font-size: 13px;
+    color: var(--text3);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .post-source {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text2);
+  }
+
+  .empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--text3);
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+  }
+
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .source-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .source-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .source-url {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .source-status {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    background: rgba(46,213,115,0.15);
+    color: var(--pos);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .update-time {
+    font-size: 11px;
+    color: var(--text2);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .chart-bar-container {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .chart-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .chart-label {
+    width: 120px;
+    font-size: 12px;
+    color: var(--text3);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .chart-bar-wrap {
+    flex: 1;
+    height: 24px;
+    background: var(--bg3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .chart-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    color: white;
+    min-width: 30px;
+  }
+
+  .chart-bar.neg { background: var(--neg); }
+  .chart-bar.pos { background: var(--pos); }
+  .chart-bar.neu { background: var(--neu); }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .sources-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="nav">
-  <div class="nav-logo">
-    <div class="logo">KT</div>
-    <div>
-      <div style="font-size:13px;font-weight:700">KT MediaScan</div>
-      <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px">АО Казахтелеком</div>
+<header class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    KT MEDIASCAN
+  </div>
+  <div class="header-right">
+    <div class="status-badge">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Загрузка...</span>
     </div>
-  </div>
-  <div class="ns">Мониторинг</div>
-  <button class="ni on" data-s="dash" onclick="go('dash',this)">◈ Лента упоминаний <span class="nbadge red" id="nb-neg">0</span></button>
-  <button class="ni" data-s="feed" onclick="go('feed',this)">◎ Все посты <span class="nbadge blue" id="nb-all">0</span></button>
-  <button class="ni" data-s="tone" onclick="go('tone',this)">◉ Тональность</button>
-  <button class="ni" data-s="src" onclick="go('src',this)">⊞ Источники</button>
-  <button class="ni" data-s="topics" onclick="go('topics',this)">◇ Темы</button>
-  <div class="ns">Аналитика</div>
-  <button class="ni" data-s="reports" onclick="go('reports',this)">📊 Отчёты</button>
-  <button class="ni" data-s="stats" onclick="go('stats',this)">📈 Статистика</button>
-  <button class="ni" data-s="sla" onclick="go('sla',this)">⏱ SLA</button>
-  <div class="ns">Управление</div>
-  <button class="ni" data-s="mgmt" onclick="go('mgmt',this)">◐ Руководство</button>
-  <button class="ni" data-s="setup" onclick="go('setup',this)">⚙ Настройки</button>
-  <div class="nav-foot">
-    <div class="live off" id="liveBadge"><div class="ldot off" id="liveDot"></div><span id="liveTxt">Не запущен</span></div>
-    <div style="font-size:10px;color:var(--tx3);margin-top:6px;text-align:center" id="navUpd">—</div>
-  </div>
-</nav>
-
-<!-- TOPBAR -->
-<header class="topbar">
-  <div class="ptitle" id="ptitle">Лента упоминаний</div>
-  <div class="ptabs">
-    <button class="pt" onclick="setPeriod('today',this)">Сегодня</button>
-    <button class="pt" onclick="setPeriod('7d',this)">7 дней</button>
-    <button class="pt" onclick="setPeriod('30d',this)">30 дней</button>
-    <button class="pt on" onclick="setPeriod('all',this)">Все</button>
-  </div>
-  <div class="tbr">
-    <span style="font-size:10px;color:var(--tx3)">Обновлено: <span id="updT">—</span></span>
-    <button class="btn p" id="startBtn" onclick="startMon()">▶ Запустить</button>
-    <button class="btn d" id="stopBtn" onclick="stopMon()" style="display:none">■ Стоп</button>
-    <div class="srch"><span style="color:var(--tx3);font-size:12px">🔍</span><input type="text" placeholder="Поиск..." oninput="search(this.value)"></div>
+    <button class="btn btn-outline" onclick="refreshData()">↻ Обновить</button>
   </div>
 </header>
 
-<!-- CONTENT -->
-<main class="content">
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-section">Мониторинг</div>
+    <div class="nav-item active" onclick="showPage('feed', this)">
+      <span>📰</span> Лента упоминаний
+      <span class="badge neg" id="navBadge">0</span>
+    </div>
+    <div class="nav-item" onclick="showPage('analytics', this)">
+      <span>📊</span> Аналитика
+    </div>
+    <div class="nav-section">Управление</div>
+    <div class="nav-item" onclick="showPage('sources', this)">
+      <span>🔗</span> Источники
+    </div>
+    <div class="nav-item" onclick="showPage('settings', this)">
+      <span>⚙️</span> Настройки
+    </div>
+  </nav>
 
-<!-- DASHBOARD -->
-<div class="sec on" id="s-dash">
-  <div class="row5">
-    <div class="card"><div class="clbl">Упоминаний</div><div class="cval" id="s-tot">0</div><div class="csub" id="sd-tot">запустите мониторинг</div></div>
-    <div class="card"><div class="clbl">Негативных</div><div class="cval" id="s-neg" style="color:var(--red-tx)">0</div><div class="csub dn" id="sd-neg"></div></div>
-    <div class="card"><div class="clbl">Позитивных</div><div class="cval" id="s-pos" style="color:var(--green-tx)">0</div><div class="csub up" id="sd-pos"></div></div>
-    <div class="card"><div class="clbl">Источников</div><div class="cval" id="s-src">0</div><div class="csub">мониторится</div></div>
-    <div class="card"><div class="clbl">Ключ. слов</div><div class="cval" id="s-kw">0</div><div class="csub">отслеживается</div></div>
-  </div>
-  <div class="g2">
-    <div class="panel"><div class="ph"><div class="pht">Динамика</div></div><div class="cw" style="height:170px"><canvas id="tChart"></canvas></div></div>
-    <div class="panel"><div class="ph"><div class="pht">Тональность</div></div>
-      <div style="display:flex;align-items:center;gap:14px;padding:12px">
-        <canvas id="sChart" width="100" height="100" style="flex-shrink:0"></canvas>
-        <div style="display:flex;flex-direction:column;gap:8px;flex:1">
-          <div style="display:flex;align-items:center;gap:7px;font-size:12px"><div style="width:9px;height:9px;border-radius:2px;background:var(--red);flex-shrink:0"></div>Негатив<span style="margin-left:auto;font-weight:700;color:var(--red-tx)" id="p-neg">0%</span></div>
-          <div style="display:flex;align-items:center;gap:7px;font-size:12px"><div style="width:9px;height:9px;border-radius:2px;background:var(--tx3);flex-shrink:0"></div>Нейтрально<span style="margin-left:auto;font-weight:700" id="p-neu">0%</span></div>
-          <div style="display:flex;align-items:center;gap:7px;font-size:12px"><div style="width:9px;height:9px;border-radius:2px;background:var(--green);flex-shrink:0"></div>Позитив<span style="margin-left:auto;font-weight:700;color:var(--green-tx)" id="p-pos">0%</span></div>
+  <main class="main">
+
+    <!-- FEED PAGE -->
+    <div class="page active" id="page-feed">
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-label">Всего упоминаний</div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-sub">за всё время</div>
+        </div>
+        <div class="stat-card neg">
+          <div class="stat-label">Негативные</div>
+          <div class="stat-value" id="statNeg">0</div>
+          <div class="stat-sub">требуют внимания</div>
+        </div>
+        <div class="stat-card pos">
+          <div class="stat-label">Позитивные</div>
+          <div class="stat-value" id="statPos">0</div>
+          <div class="stat-sub">хорошие новости</div>
+        </div>
+        <div class="stat-card neu">
+          <div class="stat-label">Нейтральные</div>
+          <div class="stat-value" id="statNeu">0</div>
+          <div class="stat-sub">информационные</div>
         </div>
       </div>
+
+      <div class="section-header">
+        <div class="section-title">// ЛЕНТА УПОМИНАНИЙ</div>
+        <div class="update-time" id="updateTime">—</div>
+      </div>
+
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterPosts('all', this)">Все</button>
+        <button class="filter-btn neg" onclick="filterPosts('negative', this)">🔴 Негативные</button>
+        <button class="filter-btn pos" onclick="filterPosts('positive', this)">🟢 Позитивные</button>
+        <button class="filter-btn neu" onclick="filterPosts('neutral', this)">🟡 Нейтральные</button>
+      </div>
+
+      <div class="posts-list" id="postsList">
+        <div class="loading">⟳ Загрузка данных...</div>
+      </div>
     </div>
-  </div>
-  <div class="gm">
-    <div class="panel">
-      <div class="ph"><div class="pht">⚡ Последние упоминания</div>
-        <div class="par">
-          <button class="chip on" onclick="chipOn(this)">Все</button>
-          <button class="chip" onclick="fDash('neg',this)">Негатив</button>
-          <button class="chip" onclick="fDash('pos',this)">Позитив</button>
+
+    <!-- ANALYTICS PAGE -->
+    <div class="page" id="page-analytics">
+      <div class="section-header">
+        <div class="section-title">// АНАЛИТИКА</div>
+      </div>
+
+      <div class="chart-bar-container">
+        <div class="section-title" style="margin-bottom:16px; font-size:12px;">Тональность упоминаний</div>
+        <div class="chart-row">
+          <div class="chart-label">Негативные</div>
+          <div class="chart-bar-wrap">
+            <div class="chart-bar neg" id="barNeg" style="width:0%">0</div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Позитивные</div>
+          <div class="chart-bar-wrap">
+            <div class="chart-bar pos" id="barPos" style="width:0%">0</div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Нейтральные</div>
+          <div class="chart-bar-wrap">
+            <div class="chart-bar neu" id="barNeu" style="width:0%">0</div>
+          </div>
         </div>
       </div>
-      <div id="df">
-        <div style="padding:36px;text-align:center;color:var(--tx3)">
-          <div style="font-size:32px;margin-bottom:12px">📡</div>
-          <div style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:8px">Мониторинг не запущен</div>
-          <div style="font-size:11px;margin-bottom:16px">Перейдите в Настройки → введите токен бота → Запустить</div>
-          <button class="btn p" onclick="go('setup',document.querySelector('[data-s=setup]'))">⚙ Настройки</button>
+
+      <div class="chart-bar-container" id="sourceChart">
+        <div class="section-title" style="margin-bottom:16px; font-size:12px;">По источникам</div>
+        <div id="sourceChartBars"></div>
+      </div>
+    </div>
+
+    <!-- SOURCES PAGE -->
+    <div class="page" id="page-sources">
+      <div class="section-header">
+        <div class="section-title">// ИСТОЧНИКИ RSS</div>
+      </div>
+      <div class="sources-grid">
+        <div class="source-card">
+          <div class="source-name">Tengri News</div>
+          <div class="source-url">tengrinews.kz/rss/</div>
+          <div class="source-status">● Активен</div>
+        </div>
+        <div class="source-card">
+          <div class="source-name">Informburo</div>
+          <div class="source-url">informburo.kz/rss</div>
+          <div class="source-status">● Активен</div>
+        </div>
+        <div class="source-card">
+          <div class="source-name">Nur.kz</div>
+          <div class="source-url">nur.kz/rss.xml</div>
+          <div class="source-status">● Активен</div>
+        </div>
+        <div class="source-card">
+          <div class="source-name">Kapital.kz</div>
+          <div class="source-url">kapital.kz/rss/</div>
+          <div class="source-status">● Активен</div>
+        </div>
+        <div class="source-card">
+          <div class="source-name">Forbes Kazakhstan</div>
+          <div class="source-url">forbes.kz/rss/</div>
+          <div class="source-status">● Активен</div>
+        </div>
+        <div class="source-card">
+          <div class="source-name">Profit.kz</div>
+          <div class="source-url">profit.kz/rss/</div>
+          <div class="source-status">● Активен</div>
         </div>
       </div>
+      <div style="font-size:13px; color:var(--text2); padding:16px; background:var(--bg2); border-radius:8px; border:1px solid var(--border);">
+        <strong style="color:var(--text);">ℹ️ Как работает мониторинг:</strong><br><br>
+        Система каждые 5 минут проверяет RSS ленты всех источников и ищет статьи с упоминанием ключевых слов: 
+        <span style="color:var(--accent);">Казахтелеком, KazakhTelecom, КТ интернет, itel, iTelecom</span> и других.<br><br>
+        Все найденные материалы автоматически анализируются на тональность и отображаются в ленте.
+      </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:11px">
-      <div class="panel"><div class="ph"><div class="pht">Источники</div></div><div class="cw" style="height:110px"><canvas id="srcChart"></canvas></div></div>
-      <div class="panel"><div class="ph"><div class="pht">Горячие темы</div></div><div class="wc" id="topCloud"><span style="font-size:11px;color:var(--tx3)">Нет данных</span></div></div>
-      <div class="panel">
-        <div class="ph"><div class="pht">SLA по ТЗ</div><span style="font-size:10px;color:var(--tx3);margin-left:3px">норма 5 мин</span></div>
-        <div class="slas">
-          <div class="sla"><div class="slah"><span>В срок (до 5 мин)</span><span style="color:var(--green-tx);font-weight:700" id="sla-ok">0%</span></div><div class="slat"><div class="slaf" id="sla-ok-b" style="background:var(--green);width:0%"></div></div></div>
-          <div class="sla"><div class="slah"><span>Задержка (5–30 мин)</span><span style="color:var(--amber-tx);font-weight:700" id="sla-w">0%</span></div><div class="slat"><div class="slaf" id="sla-w-b" style="background:var(--amber);width:0%"></div></div></div>
-          <div class="sla"><div class="slah"><span>Просрочено (&gt;30 мин)</span><span style="color:var(--red-tx);font-weight:700" id="sla-e">0%</span></div><div class="slat"><div class="slaf" id="sla-e-b" style="background:var(--red);width:0%"></div></div></div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div class="section-header">
+        <div class="section-title">// НАСТРОЙКИ</div>
+      </div>
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:20px; margin-bottom:16px;">
+        <div style="font-size:14px; font-weight:600; margin-bottom:16px;">Ключевые слова</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <span style="padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px;">Казахтелеком</span>
+          <span style="padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px;">KazakhTelecom</span>
+          <span style="padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px;">telecomkz</span>
+          <span style="padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px;">КТ интернет</span>
+          <span style="padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px;">itel</span>
+          <span style="padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px;">иттелеком</span>
+          <span style="padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px;">сбой интернет</span>
+          <span style="padding:4px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:12px;">КТ не работает</span>
         </div>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- FEED -->
-<div class="sec" id="s-feed">
-  <div class="panel">
-    <div class="ph" style="gap:5px">
-      <button class="chip on" onclick="fFeed('all',this)">Все</button>
-      <button class="chip" onclick="fFeed('neg',this)">Негатив</button>
-      <button class="chip" onclick="fFeed('pos',this)">Позитив</button>
-      <button class="chip" onclick="fFeed('neu',this)">Нейтрально</button>
-      <div style="margin-left:auto">
-        <select id="srcF" onchange="fFeed('src',null)" style="background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r);padding:4px 8px;color:var(--tx2);font-size:11px;font-family:inherit;outline:none">
-          <option value="">Все источники</option>
-          <option>telegram</option><option>instagram</option><option>tiktok</option><option>vkontakte</option><option>youtube</option><option>facebook</option>
-        </select>
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:20px;">
+        <div style="font-size:14px; font-weight:600; margin-bottom:12px;">Статус системы</div>
+        <div id="settingsStatus" style="font-size:13px; color:var(--text2); font-family:'IBM Plex Mono',monospace;"></div>
       </div>
     </div>
-    <div id="ff"><div style="padding:28px;text-align:center;color:var(--tx3);font-size:11px">Запустите мониторинг</div></div>
-    <div class="pag" id="pag" style="display:none"><div class="pagi" id="pagi"></div><div class="pagb" id="pagb"></div></div>
-  </div>
-</div>
 
-<!-- ТОНАЛЬНОСТЬ -->
-<div class="sec" id="s-tone">
-  <div class="row3">
-    <div class="card"><div class="clbl">Негативных</div><div class="cval" style="color:var(--red-tx)" id="t-neg">0</div><div class="csub dn" id="tp-neg">0%</div></div>
-    <div class="card"><div class="clbl">Нейтральных</div><div class="cval" id="t-neu">0</div><div class="csub" id="tp-neu">0%</div></div>
-    <div class="card"><div class="clbl">Позитивных</div><div class="cval" style="color:var(--green-tx)" id="t-pos">0</div><div class="csub up" id="tp-pos">0%</div></div>
-  </div>
-  <div class="g2">
-    <div class="panel"><div class="ph"><div class="pht">По источникам</div></div><div class="bars" id="toneSrc"></div></div>
-    <div class="panel"><div class="ph"><div class="pht">Тренд</div></div><div class="cw" style="height:190px"><canvas id="toneChart"></canvas></div></div>
-  </div>
+  </main>
 </div>
-
-<!-- ИСТОЧНИКИ -->
-<div class="sec" id="s-src">
-  <div class="panel"><div class="ph"><div class="pht">По источникам</div></div>
-    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Источник</th><th>Постов</th><th>Охват</th><th>Доля</th><th>Негатив%</th><th>Позитив%</th></tr></thead><tbody id="srcBody"></tbody></table></div>
-  </div>
-</div>
-
-<!-- ТЕМЫ -->
-<div class="sec" id="s-topics">
-  <div class="panel"><div class="ph"><div class="pht">Темы и ключевые слова</div></div>
-    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Тема</th><th>Упоминаний</th><th>Негатив</th><th>Нейтрально</th><th>Позитив</th></tr></thead><tbody id="topBody"></tbody></table></div>
-  </div>
-</div>
-
-<!-- ОТЧЁТЫ -->
-<div class="sec" id="s-reports">
-  <div style="display:flex;gap:7px;justify-content:flex-end">
-    <button class="btn p" onclick="exportCSV()">⬇ Экспорт CSV</button>
-    <button class="btn" onclick="window.print()">🖨 Печать</button>
-  </div>
-  <div class="row4">
-    <div class="card"><div class="clbl">Всего</div><div class="cval" id="r-tot">0</div><div class="csub" id="r-per">—</div></div>
-    <div class="card"><div class="clbl">Негативных</div><div class="cval" style="color:var(--red-tx)" id="r-neg">0</div><div class="csub dn" id="r-np">0%</div></div>
-    <div class="card"><div class="clbl">Позитивных</div><div class="cval" style="color:var(--green-tx)" id="r-pos">0</div><div class="csub up" id="r-pp">0%</div></div>
-    <div class="card"><div class="clbl">Нейтральных</div><div class="cval" id="r-neu">0</div><div class="csub" id="r-nup">0%</div></div>
-  </div>
-  <div class="g2">
-    <div class="panel"><div class="ph"><div class="pht">Топ источников</div></div><div class="bars" id="rSrc"></div></div>
-    <div class="panel"><div class="ph"><div class="pht">Топ ключевых слов</div></div><div class="bars" id="rKw"></div></div>
-  </div>
-  <div class="panel">
-    <div class="ph"><div class="pht">Все упоминания</div><span style="font-size:10px;color:var(--tx3);margin-left:4px" id="rCnt">0 записей</span></div>
-    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Дата</th><th>Источник</th><th>Автор</th><th>Тональность</th><th>Тема</th><th>Текст</th></tr></thead><tbody id="rBody"></tbody></table></div>
-  </div>
-</div>
-
-<!-- СТАТИСТИКА -->
-<div class="sec" id="s-stats">
-  <div class="row4">
-    <div class="card"><div class="clbl">Среднее в день</div><div class="cval" id="st-avg">0</div><div class="csub">упоминаний</div></div>
-    <div class="card"><div class="clbl">Пиковый час</div><div class="cval" id="st-peak">—</div><div class="csub" id="st-pc">—</div></div>
-    <div class="card"><div class="clbl">Индекс негатива</div><div class="cval" style="color:var(--red-tx)" id="st-ni">0%</div><div class="csub dn">от всех</div></div>
-    <div class="card"><div class="clbl">Уникальных каналов</div><div class="cval" id="st-uniq">0</div></div>
-  </div>
-  <div class="g2">
-    <div class="panel"><div class="ph"><div class="pht">Активность по часам</div></div><div class="cw" style="height:190px"><canvas id="hChart"></canvas></div></div>
-    <div class="panel"><div class="ph"><div class="pht">Тональность по дням</div></div><div class="cw" style="height:190px"><canvas id="dChart"></canvas></div></div>
-  </div>
-</div>
-
-<!-- SLA -->
-<div class="sec" id="s-sla">
-  <div class="panel"><div class="ph"><div class="pht">Нормативы по ТЗ Казахтелекома</div></div>
-    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Тип обращения</th><th>Норматив</th><th>Статус</th></tr></thead>
-    <tbody>
-      <tr><td><strong>Первичное реагирование</strong></td><td style="color:var(--green-tx)">5 минут</td><td style="color:var(--green-tx)">✓ Активен</td></tr>
-      <tr><td><strong>Претензии — качество услуг</strong></td><td style="color:var(--amber-tx)">3 дня</td><td>—</td></tr>
-      <tr><td><strong>Претензии — начисления (CRM)</strong></td><td style="color:var(--amber-tx)">10 дней</td><td>—</td></tr>
-      <tr><td><strong>Мониторинг</strong></td><td style="color:var(--tx2)">08:00–23:00 ежедневно</td><td style="color:var(--green-tx)">✓ Активен</td></tr>
-    </tbody>
-    </table></div>
-  </div>
-</div>
-
-<!-- РУКОВОДСТВО -->
-<div class="sec" id="s-mgmt">
-  <div class="g2">
-    <div class="panel">
-      <div class="ph"><div class="pht">Б. Мусин — Председатель правления</div><div class="par"><button class="btn p" onclick="openMod('Анализ медиаобраза','Б. Мусин')">Анализ ↗</button></div></div>
-      <div class="row4" style="padding:12px;gap:8px">
-        <div class="card"><div class="clbl">Упоминаний</div><div class="cval" style="font-size:20px" id="m-cnt">—</div></div>
-        <div class="card"><div class="clbl">Негатив</div><div class="cval" style="font-size:20px;color:var(--red-tx)" id="m-neg">—</div></div>
-        <div class="card"><div class="clbl">Позитив</div><div class="cval" style="font-size:20px;color:var(--green-tx)" id="m-pos">—</div></div>
-        <div class="card"><div class="clbl">Охват</div><div class="cval" style="font-size:20px" id="m-reach">—</div></div>
-      </div>
-      <div class="bars" id="mTopics"></div>
-    </div>
-    <div class="panel">
-      <div class="ph"><div class="pht">Директора</div></div>
-      <div style="padding:10px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:9px">
-        <div style="width:30px;height:30px;border-radius:50%;background:var(--green-bg);color:var(--green-tx);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">АЖ</div>
-        <div style="flex:1"><div style="font-size:12px;font-weight:600">А. Жаксыбеков</div><div style="font-size:10px;color:var(--tx3)">Зам. председателя</div></div>
-        <button class="btn" onclick="openMod('Анализ','А. Жаксыбеков')">↗</button>
-      </div>
-      <div style="padding:10px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:9px">
-        <div style="width:30px;height:30px;border-radius:50%;background:var(--amber-bg);color:var(--amber-tx);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">ЕН</div>
-        <div style="flex:1"><div style="font-size:12px;font-weight:600">Е. Нурмаганбет</div><div style="font-size:10px;color:var(--tx3)">Технический директор</div></div>
-        <button class="btn" onclick="openMod('Анализ','Е. Нурмаганбет')">↗</button>
-      </div>
-      <div style="padding:10px 12px;display:flex;align-items:center;gap:9px">
-        <div style="width:30px;height:30px;border-radius:50%;background:rgba(139,92,246,.12);color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">ГС</div>
-        <div style="flex:1"><div style="font-size:12px;font-weight:600">Г. Сейтқали</div><div style="font-size:10px;color:var(--tx3)">Директор по маркетингу</div></div>
-        <button class="btn" onclick="openMod('Анализ','Г. Сейтқали')">↗</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- НАСТРОЙКИ -->
-<div class="sec" id="s-setup">
-  <div class="scard">
-    <div style="font-size:15px;font-weight:700;margin-bottom:5px">⚙ Настройки мониторинга</div>
-    <div style="font-size:12px;color:var(--tx2);margin-bottom:18px">Telegram Bot API для получения данных в реальном времени</div>
-    <div class="sbar" id="sbar"><div class="sdot wait" id="sdot"></div><span id="stxt">Введите токен и нажмите Проверить</span></div>
-    <label class="flbl">Telegram Bot Token</label>
-    <input class="finp mono" id="tkInp" type="password" placeholder="1234567890:AAFxxxxxxxxx">
-    <div style="display:flex;gap:7px;margin-bottom:14px">
-      <button class="btn p" onclick="testBot()" style="flex:1">Проверить подключение</button>
-      <button class="btn" onclick="saveSet()">Сохранить</button>
-    </div>
-    <label class="flbl">Ключевые слова</label>
-    <div class="tags" id="kwTags"></div>
-    <div style="display:flex;gap:7px;margin-bottom:14px">
-      <input class="finp" id="kwInp" placeholder="Добавить слово..." onkeydown="if(event.key==='Enter')addKw()" style="flex:1;margin-bottom:0">
-      <button class="btn" onclick="addKw()">+ Добавить</button>
-    </div>
-    <label class="flbl">Telegram каналы</label>
-    <div id="chList"></div>
-    <div style="display:flex;gap:7px;margin-bottom:14px">
-      <input class="finp" id="chInp" placeholder="@channel или -1001234567890" onkeydown="if(event.key==='Enter')addCh()" style="flex:1;margin-bottom:0">
-      <button class="btn" onclick="addCh()">+ Добавить</button>
-    </div>
-    <label class="flbl">Лог работы</label>
-    <div class="log" id="logEl">Ожидание запуска...</div>
-    <div style="margin-top:14px;padding:12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--bd2);font-size:11px;color:var(--tx2);line-height:1.8">
-      <strong style="color:var(--tx)">📋 Аккаунты КТ из ТЗ:</strong><br>
-      Instagram: @telecomkz · Telegram: -1001574150270<br>
-      Facebook: sizdintelecom, telecomkz · VK: telecomkz<br>
-      Twitter: @telecom_kz · TikTok: @telecomkz
-    </div>
-  </div>
-</div>
-
-</main>
-
-<!-- MODAL -->
-<div class="mov" id="mOv" onclick="if(event.target===this)closeMod()">
-  <div class="modal">
-    <div style="font-size:14px;font-weight:700;margin-bottom:3px" id="mT"></div>
-    <div style="font-size:11px;color:var(--tx2);padding-bottom:12px;border-bottom:1px solid var(--bd);margin-bottom:12px" id="mS"></div>
-    <textarea class="mta" id="mTa" placeholder="Введите текст ответа под @kazakhtelecom..."></textarea>
-    <div class="mft">
-      <button class="btn" onclick="closeMod()">Отмена</button>
-      <button class="btn p" onclick="submitMod()">Опубликовать ↗</button>
-    </div>
-  </div>
-</div>
-<div class="toast" id="tst"></div>
 
 <script>
-// ═══ STATE ═══
-var POSTS=[], PERIOD='all', RUNNING=false, POLL=null, TOKEN='', UPDATE_ID=0, PAGE=1, PS=25;
-var KW=['Казахтелеком','казахтелеком','kazakhtelecom','КТ ','#КТ','telecomkz','@telecomkz','@telecom_kz','сбой интернет','тариф КТ','КТ не работает'];
-var CH=[];
-var tChart,sChart,srcChart,toneChart,hChart,dChart;
+let allPosts = [];
+let currentFilter = 'all';
 
-// ═══ INIT ═══
-document.addEventListener('DOMContentLoaded',function(){
-  initCharts();
-  loadSet();
-  renderKw();
-  renderCh();
-  try{var s=localStorage.getItem('kt_v3');if(s){POSTS=JSON.parse(s);renderAll();}}catch(e){}
-  // Автозапуск
-  setTimeout(function(){ startMon(); }, 500);
-});
-
-// ═══ NAV ═══
-function go(id,el){
-  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('on');});
-  var sec=document.getElementById('s-'+id);
-  if(sec)sec.classList.add('on');
-  var t={dash:'Лента упоминаний',feed:'Все посты',tone:'Тональность',src:'Источники',topics:'Темы',reports:'Отчёты',stats:'Статистика',sla:'SLA',mgmt:'Руководство',setup:'Настройки'};
-  document.getElementById('ptitle').textContent=t[id]||id;
-  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
-  if(el)el.classList.add('on');
-  if(['reports','stats','sla','topics','src','tone'].includes(id))renderAll();
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'analytics') updateCharts();
+  if (name === 'settings') loadSettings();
 }
 
-function setPeriod(k,btn){
-  PERIOD=k;
-  document.querySelectorAll('.pt').forEach(function(b){b.classList.remove('on');});
-  btn.classList.add('on');
-  PAGE=1;renderAll();
-  toast({all:'Все данные',today:'Сегодня','7d':'7 дней','30d':'30 дней'}[k],'i');
-}
+async function fetchData() {
+  try {
+    const [postsRes, statsRes, statusRes] = await Promise.all([
+      fetch('/api/posts?limit=200'),
+      fetch('/api/stats'),
+      fetch('/api/status')
+    ]);
+    allPosts = await postsRes.json();
+    const stats = await statsRes.json();
+    const status = await statusRes.json();
 
-function chipOn(btn){
-  var p=btn.closest('.ph,.par');
-  if(p)p.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
-  btn.classList.add('on');
-}
+    document.getElementById('statTotal').textContent = stats.total || 0;
+    document.getElementById('statNeg').textContent = stats.negative || 0;
+    document.getElementById('statPos').textContent = stats.positive || 0;
+    document.getElementById('statNeu').textContent = stats.neutral || 0;
+    document.getElementById('navBadge').textContent = stats.negative || 0;
 
-// ═══ SETTINGS ═══
-function loadSet(){
-  try{
-    var s=JSON.parse(localStorage.getItem('kt_set_v3')||'{}');
-    if(s.token){TOKEN=s.token;document.getElementById('tkInp').value=s.token;}
-    if(s.kw)KW=s.kw;
-    if(s.ch)CH=s.ch;
-  }catch(e){}
-}
-
-function saveSet(){
-  TOKEN=document.getElementById('tkInp').value.trim();
-  localStorage.setItem('kt_set_v3',JSON.stringify({token:TOKEN,kw:KW,ch:CH}));
-  toast('✓ Настройки сохранены','s');
-}
-
-function renderKw(){
-  document.getElementById('kwTags').innerHTML=KW.map(function(k){
-    return '<span class="tag">'+k+'<button class="tagrm" onclick="removeKw(\''+k+'\')">×</button></span>';
-  }).join('');
-  var el=document.getElementById('s-kw');if(el)el.textContent=KW.length;
-}
-
-function addKw(){
-  var v=document.getElementById('kwInp').value.trim();
-  if(!v||KW.includes(v))return;
-  KW.push(v);renderKw();document.getElementById('kwInp').value='';saveSet();
-}
-
-function removeKw(k){KW=KW.filter(function(x){return x!==k;});renderKw();saveSet();}
-
-function renderCh(){
-  var el=document.getElementById('chList');
-  if(!CH.length){el.innerHTML='<div style="font-size:11px;color:var(--tx3);padding:6px 0;margin-bottom:8px">Каналы не добавлены</div>';return;}
-  el.innerHTML=CH.map(function(c){
-    return '<div class="chrow"><span>📢</span><span style="flex:1">'+c+'</span><button class="chrm" onclick="removeCh(\''+c+'\')">✕</button></div>';
-  }).join('');
-}
-
-function addCh(){
-  var v=document.getElementById('chInp').value.trim();
-  if(!v||CH.includes(v))return;
-  CH.push(v);renderCh();document.getElementById('chInp').value='';saveSet();log('📢 Канал: '+v);
-}
-
-function removeCh(c){CH=CH.filter(function(x){return x!==c;});renderCh();saveSet();}
-
-// ═══ BOT ═══
-async function testBot(){
-  TOKEN=document.getElementById('tkInp').value.trim();
-  setSt('wait','Проверяем...');
-  try{
-    var r=await fetch('https://api.telegram.org/bot'+TOKEN+'/getMe');
-    var d=await r.json();
-    if(d.ok){setSt('ok','✓ Бот: @'+d.result.username);toast('✓ @'+d.result.username+' подключён!','s');log('✅ Бот: @'+d.result.username);saveSet();}
-    else{setSt('err','✗ '+d.description);toast(d.description,'e');}
-  }catch(e){setSt('err','✗ '+e.message);toast(e.message,'e');}
-}
-
-function setSt(t,txt){
-  var d=document.getElementById('sdot');d.className='sdot '+t;
-  document.getElementById('stxt').textContent=txt;
-}
-
-// ═══ MONITORING ═══
-async function startMon(){
-  RUNNING=true;window._poll=false;
-  if(POLL)clearInterval(POLL);
-  document.getElementById('startBtn').style.display='none';
-  document.getElementById('stopBtn').style.display='';
-  setLive(true);
-  log('🚀 Подключено к серверу · '+new Date().toLocaleTimeString('ru-RU'));
-  POLL=setInterval(poll,5000);
-  await poll();
-  toast('✓ Мониторинг запущен — данные с сервера','s');
-}
-
-function stopMon(){
-  RUNNING=false;window._poll=false;
-  clearInterval(POLL);POLL=null;
-  document.getElementById('startBtn').style.display='';
-  document.getElementById('stopBtn').style.display='none';
-  setLive(false);log('⏹ Остановлен');toast('Остановлен','i');
-}
-
-async function poll(){
-  if(!RUNNING||window._poll)return;
-  window._poll=true;
-  try{
-    var r=await fetch('/api/posts');
-    var d=await r.json();
-    if(!d.ok)return;
-    var newPosts=d.posts||[];
-    var existIds=new Set(POSTS.map(function(p){return p.id;}));
-    var fresh=newPosts.filter(function(p){return!existIds.has(p.id);});
-    if(fresh.length>0){
-      POSTS=fresh.concat(POSTS).slice(0,2000);
-      renderAll();
-      var t=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      document.getElementById('updT').textContent=t;
-      document.getElementById('navUpd').textContent='Обновлено: '+t;
-      fresh.forEach(function(p){
-        var tone=p.emotional_tone||'neutral';
-        log((tone==='negative'?'🔴':tone==='positive'?'🟢':'⚪')+' ['+tone+'] '+p.source_name+': '+(p.text||'').slice(0,50));
-      });
+    const dot = document.getElementById('statusDot');
+    const txt = document.getElementById('statusText');
+    if (status.active) {
+      dot.style.background = 'var(--pos)';
+      txt.textContent = `LIVE · ${status.posts_count} упоминаний`;
+    } else {
+      dot.style.background = 'var(--neu)';
+      txt.textContent = 'Остановлен';
     }
-  }catch(e){log('❌ '+e.message);}
-  finally{window._poll=false;}
+
+    document.getElementById('updateTime').textContent = 
+      'Обновлено: ' + new Date().toLocaleTimeString('ru-RU');
+
+    renderPosts();
+  } catch(e) {
+    console.error(e);
+  }
 }
 
-function analyzeTone(text){
-  var t=text.toLowerCase();
-  var neg=['не работает','сломал','ужас','плохо','медленно','отврат','кошмар','ошибка','проблема','сбой','жалоба','обман','дорого','монополи','не отвеч','безобраз','отвратит','мошен','ужасн'];
-  var pos=['спасибо','отлично','хорошо','быстро','помогли','решили','рекомендую','лучший','супер','молодцы','класс','доволен','хваль','благодар','отличный'];
-  var nc=neg.filter(function(w){return t.includes(w);}).length;
-  var pc=pos.filter(function(w){return t.includes(w);}).length;
-  return nc>pc?'negative':pc>nc?'positive':'neutral';
-}
-
-// ═══ FILTERED POSTS ═══
-function getFiltered(){
-  if(PERIOD==='all')return POSTS;
-  var now=new Date();
-  if(PERIOD==='today'){var s=new Date(now.getFullYear(),now.getMonth(),now.getDate());return POSTS.filter(function(p){return new Date(p.publication_time||0)>=s;});}
-  var days={'7d':7,'30d':30}[PERIOD]||7;
-  return POSTS.filter(function(p){return new Date(p.publication_time||0)>=new Date(now-days*86400000);});
-}
-
-// ═══ RENDER ═══
-function renderAll(){
-  var posts=getFiltered();
-  var tot=posts.length;
-  var neg=posts.filter(function(p){return p.emotional_tone==='negative';}).length;
-  var pos=posts.filter(function(p){return p.emotional_tone==='positive';}).length;
-  var neu=tot-neg-pos;
-  var np=tot?Math.round(neg/tot*100):0,pp=tot?Math.round(pos/tot*100):0,nup=100-np-pp;
-
-  set('s-tot',tot);set('s-neg',neg);set('s-pos',pos);
-  set('sd-tot',tot?'за '+({all:'всё время',today:'сегодня','7d':'7 дней','30d':'30 дней'}[PERIOD]||PERIOD):'запустите мониторинг');
-  set('sd-neg',tot?np+'% от всех':'');set('sd-pos',tot?pp+'% от всех':'');
-  set('p-neg',np+'%');set('p-neu',nup+'%');set('p-pos',pp+'%');
-  set('nb-neg',neg||'0');set('nb-all',tot||'0');
-  set('t-neg',neg);set('t-neu',neu);set('t-pos',pos);
-  set('tp-neg',np+'%');set('tp-neu',nup+'%');set('tp-pos',pp+'%');
-  set('r-tot',tot);set('r-neg',neg);set('r-pos',pos);set('r-neu',neu);
-  set('r-np',np+'%');set('r-pp',pp+'%');set('r-nup',nup+'%');
-  set('r-per',{all:'за всё время',today:'за сегодня','7d':'за 7 дней','30d':'за 30 дней'}[PERIOD]||'');
-  set('m-cnt',tot);set('m-neg',np+'%');set('m-pos',pp+'%');
-  set('m-reach',fmtN(posts.reduce(function(s,p){return s+(p.views_count||0);},0)));
-
-  if(sChart){sChart.data.datasets[0].data=[np,nup,pp];sChart.update();}
-
-  var srcMap={};
-  posts.forEach(function(p){var s=p.source_type||'other';if(!srcMap[s])srcMap[s]={tot:0,neg:0,pos:0,v:0};srcMap[s].tot++;srcMap[s].v+=(p.views_count||0);if(p.emotional_tone==='negative')srcMap[s].neg++;else if(p.emotional_tone==='positive')srcMap[s].pos++;});
-  var srcArr=Object.entries(srcMap).sort(function(a,b){return b[1].tot-a[1].tot;});
-  if(srcChart&&srcArr.length){srcChart.data.labels=srcArr.map(function(x){return x[0].slice(0,7);});srcChart.data.datasets[0].data=srcArr.map(function(x){return x[1].tot;});srcChart.update();}
-  set('s-src',srcArr.length);
-
-  var hrMap={};
-  posts.forEach(function(p){var h=new Date(p.publication_time||0).getHours()+':00';if(!hrMap[h])hrMap[h]={a:0,n:0,p:0};hrMap[h].a++;if(p.emotional_tone==='negative')hrMap[h].n++;else if(p.emotional_tone==='positive')hrMap[h].p++;});
-  var hrs=Object.entries(hrMap).sort(function(a,b){return a[0]>b[0]?1:-1;}).slice(-14);
-  if(tChart&&hrs.length){tChart.data.labels=hrs.map(function(x){return x[0];});tChart.data.datasets[0].data=hrs.map(function(x){return x[1].a;});tChart.data.datasets[1].data=hrs.map(function(x){return x[1].n;});tChart.update();}
-  if(toneChart&&hrs.length){toneChart.data.labels=hrs.map(function(x){return x[0];});toneChart.data.datasets[0].data=hrs.map(function(x){return x[1].n;});toneChart.data.datasets[1].data=hrs.map(function(x){return x[1].p;});toneChart.update();}
-
-  var ha=Array(24).fill(0);posts.forEach(function(p){ha[new Date(p.publication_time||0).getHours()]++;});
-  if(hChart){hChart.data.datasets[0].data=ha;hChart.update();}
-
-  var dayMap={};
-  posts.forEach(function(p){var d=(p.publication_time||'').split('T')[0];if(!d)return;if(!dayMap[d])dayMap[d]={n:0,p:0,neu:0};if(p.emotional_tone==='negative')dayMap[d].n++;else if(p.emotional_tone==='positive')dayMap[d].p++;else dayMap[d].neu++;});
-  var dayArr=Object.entries(dayMap).sort(function(a,b){return a[0]>b[0]?1:-1;}).slice(-14);
-  if(dChart&&dayArr.length){dChart.data.labels=dayArr.map(function(x){return x[0].slice(5);});dChart.data.datasets[0].data=dayArr.map(function(x){return x[1].n;});dChart.data.datasets[1].data=dayArr.map(function(x){return x[1].p;});dChart.data.datasets[2].data=dayArr.map(function(x){return x[1].neu;});dChart.update();}
-
-  var kwMap={};posts.forEach(function(p){if(p.matched_keyword)kwMap[p.matched_keyword]=(kwMap[p.matched_keyword]||0)+1;});
-  var kwArr=Object.entries(kwMap).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
-  if(kwArr.length){
-    var mx=kwArr[0][1];
-    document.getElementById('topCloud').innerHTML=kwArr.map(function(x){
-      var sz=10+Math.round(x[1]/mx*6);
-      var c=x[1]>mx*.7?'background:var(--red-bg);color:var(--red-tx);border-color:rgba(229,57,53,.2)':x[1]>mx*.4?'background:var(--amber-bg);color:var(--amber-tx);border-color:rgba(245,158,11,.2)':'background:var(--bg4);color:var(--tx2);border-color:var(--bd2)';
-      return '<span class="wctag" style="font-size:'+sz+'px;'+c+'">'+x[0]+' ('+x[1]+')</span>';
-    }).join('');
+function renderPosts() {
+  const list = document.getElementById('postsList');
+  let filtered = allPosts;
+  if (currentFilter !== 'all') {
+    filtered = allPosts.filter(p => p.tone === currentFilter);
   }
 
-  var maxS=srcArr[0]?srcArr[0][1].tot:1;
-  document.getElementById('toneSrc').innerHTML=srcArr.slice(0,6).map(function(x){
-    var pct=Math.round(x[1].neg/x[1].tot*100);
-    var col=pct>60?'var(--red)':pct>40?'var(--amber)':'var(--green)';
-    return '<div class="br"><span class="brl">'+x[0]+'</span><div class="brt"><div class="brf" style="width:'+Math.round(x[1].tot/maxS*100)+'%;background:'+col+'"></div></div><span class="brv">'+x[1].tot+'</span></div>';
-  }).join('')||'<div style="padding:14px;text-align:center;color:var(--tx3);font-size:11px">Нет данных</div>';
-
-  document.getElementById('srcBody').innerHTML=srcArr.map(function(x){
-    return '<tr><td style="font-weight:600">'+x[0]+'</td><td style="font-weight:700">'+x[1].tot+'</td><td>'+fmtN(x[1].v)+'</td><td>'+Math.round(x[1].tot/tot*100)+'%</td><td style="color:var(--red-tx)">'+Math.round(x[1].neg/x[1].tot*100)+'%</td><td style="color:var(--green-tx)">'+Math.round(x[1].pos/x[1].tot*100)+'%</td></tr>';
-  }).join('')||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3)">Нет данных</td></tr>';
-
-  document.getElementById('topBody').innerHTML=kwArr.map(function(x){
-    var tp=posts.filter(function(p){return p.matched_keyword===x[0];});
-    return '<tr><td style="font-weight:600">'+x[0]+'</td><td style="font-weight:700">'+x[1]+'</td><td style="color:var(--red-tx)">'+tp.filter(function(p){return p.emotional_tone==='negative';}).length+'</td><td>'+tp.filter(function(p){return p.emotional_tone==='neutral';}).length+'</td><td style="color:var(--green-tx)">'+tp.filter(function(p){return p.emotional_tone==='positive';}).length+'</td></tr>';
-  }).join('')||'<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--tx3)">Нет данных</td></tr>';
-
-  var mkx=kwArr[0]?kwArr[0][1]:1;
-  document.getElementById('mTopics').innerHTML=kwArr.slice(0,5).map(function(x){
-    var col=x[1]>mkx*.6?'var(--red)':x[1]>mkx*.3?'var(--amber)':'var(--kt)';
-    return '<div class="br"><span class="brl">'+x[0].slice(0,14)+'</span><div class="brt"><div class="brf" style="width:'+Math.round(x[1]/mkx*100)+'%;background:'+col+'"></div></div><span class="brv">'+x[1]+'</span></div>';
-  }).join('')||'<div style="padding:12px;text-align:center;color:var(--tx3);font-size:11px">Нет данных</div>';
-
-  document.getElementById('rSrc').innerHTML=srcArr.slice(0,6).map(function(x){
-    return '<div class="br"><span class="brl">'+x[0]+'</span><div class="brt"><div class="brf" style="width:'+Math.round(x[1].tot/maxS*100)+'%;background:var(--kt)"></div></div><span class="brv">'+x[1].tot+'</span></div>';
-  }).join('');
-  var mkw=kwArr[0]?kwArr[0][1]:1;
-  document.getElementById('rKw').innerHTML=kwArr.slice(0,6).map(function(x){
-    var col=x[1]>mkw*.6?'var(--red)':x[1]>mkw*.3?'var(--amber)':'var(--kt)';
-    return '<div class="br"><span class="brl">'+x[0].slice(0,14)+'</span><div class="brt"><div class="brf" style="width:'+Math.round(x[1]/mkw*100)+'%;background:'+col+'"></div></div><span class="brv">'+x[1]+'</span></div>';
-  }).join('');
-
-  set('rCnt',tot+' записей');
-  document.getElementById('rBody').innerHTML=posts.slice(0,100).map(function(p){
-    var tone=p.emotional_tone||'neutral';
-    var tc=tone==='negative'?'color:var(--red-tx)':tone==='positive'?'color:var(--green-tx)':'color:var(--tx2)';
-    var dt=p.publication_time?new Date(p.publication_time).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-    return '<tr><td style="white-space:nowrap">'+dt+'</td><td style="font-weight:600">'+p.source_type+'</td><td>'+p.author+'</td><td style="'+tc+';font-weight:600">'+tone+'</td><td>'+p.matched_keyword+'</td><td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.text.slice(0,80)+'</td></tr>';
-  }).join('')||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--tx3)">Нет данных</td></tr>';
-
-  var days2=[...new Set(posts.map(function(p){return(p.publication_time||'').split('T')[0];}).filter(Boolean))];
-  set('st-avg',days2.length?Math.round(tot/days2.length):tot);
-  var ph=Object.entries(hrMap).sort(function(a,b){return b[1].a-a[1].a;})[0];
-  if(ph){set('st-peak',ph[0]);set('st-pc',ph[1].a+' упоминаний');}
-  set('st-ni',np+'%');
-  set('st-uniq',new Set(posts.map(function(p){return p.source_name||p.source_type||'other';})).size);
-
-  renderFeed('df',posts.slice(0,8));
-  renderFeed('ff',posts.slice((PAGE-1)*PS,PAGE*PS));
-  renderPag(posts.length);
-}
-
-function renderFeed(id,posts){
-  var el=document.getElementById(id);
-  if(!posts||!posts.length){
-    el.innerHTML='<div style="padding:36px;text-align:center;color:var(--tx3)"><div style="font-size:30px;margin-bottom:10px">📡</div><div style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:7px">'+(RUNNING?'Ожидание сообщений...':'Мониторинг не запущен')+'</div><div style="font-size:11px;margin-bottom:14px">'+(RUNNING?'Данные появятся как только придут новые сообщения':'Перейдите в Настройки → введите токен → Запустить')+'</div>'+(RUNNING?'':'<button class="btn p" onclick="go(\'setup\',document.querySelector(\'[data-s=setup]\'))">⚙ Настройки</button>')+'</div>';
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <h3>Нет упоминаний</h3>
+        <p>Система мониторит RSS ленты каждые 5 минут.<br>Упоминания появятся автоматически.</p>
+      </div>`;
     return;
   }
-  el.innerHTML=posts.map(renderPost).join('');
+
+  list.innerHTML = filtered.map(p => `
+    <div class="post-card ${p.tone}">
+      <div class="post-header">
+        <div class="post-title">
+          ${p.url ? `<a href="${p.url}" target="_blank">${p.title || 'Без заголовка'}</a>` : (p.title || 'Без заголовка')}
+        </div>
+        <span class="tone-badge ${p.tone}">${p.tone === 'negative' ? '−' : p.tone === 'positive' ? '+' : '○'} ${p.tone}</span>
+      </div>
+      ${p.text ? `<div class="post-text">${p.text.substring(0, 200)}${p.text.length > 200 ? '...' : ''}</div>` : ''}
+      <div class="post-meta">
+        <span class="post-source">${p.source}</span>
+        <span>${new Date(p.time).toLocaleString('ru-RU')}</span>
+        ${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--accent2); text-decoration:none;">→ открыть</a>` : ''}
+      </div>
+    </div>
+  `).join('');
 }
 
-function renderPost(p){
-  var tone=p.emotional_tone||'neutral';
-  var isN=tone==='negative',isP=tone==='positive';
-  var src=(p.source_type||'other').toLowerCase();
-  var cls=isN?'neg':isP?'pos':'neu';
-  var bc=isN&&(p.views_count>50000)?'r':isN?'a':isP?'g':'n';
-  var bl=isN&&(p.views_count>50000)?'⚡ СРОЧНО':isN?'⚠ ВАЖНО':isP?'✓ ПОЗИТИВ':'— НЕЙТР.';
-  var dt=p.publication_time?new Date(p.publication_time).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-  return '<div class="post '+cls+'" data-tone="'+tone+'" data-src="'+src+'"><div class="pico s-'+src+'">'+(src==='telegram'?'TG':src==='instagram'?'IG':src.slice(0,2).toUpperCase())+'</div><div class="pbody"><div class="phead"><span class="pauth">'+p.author+'</span><span class="sbadge s-'+src+'">'+p.source_name+'</span><span class="tbadge '+(isN?'neg':isP?'pos':'neu')+'">'+tone+'</span>'+(p.topic_name?'<span class="pkw">'+p.topic_name+'</span>':'')+'<span class="ptime">'+dt+'</span></div><div class="ptxt">'+p.text.slice(0,220)+(p.text.length>220?'...':'')+'</div><div class="pfoot">'+(p.views_count?'<span class="pstat">👁 '+fmtN(p.views_count)+'</span>':'')+(p.shares_count?'<span class="pstat">↗ '+fmtN(p.shares_count)+'</span>':'')+'</div></div><div class="pright"><div class="ublk '+bc+'"><div class="ulbl '+bc+'">'+bl+'</div><div class="usub">'+dt+'</div></div><button class="btn" style="font-size:10px" onclick="openMod(\'Ответить\',\''+p.source_name+'\')">Ответить ↗</button>'+(p.url&&p.url!=='#'?'<a href="'+p.url+'" target="_blank" class="btn" style="text-align:center;text-decoration:none;font-size:10px;display:block">Открыть ↗</a>':'')+'</div></div>';
+function filterPosts(tone, btn) {
+  currentFilter = tone;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPosts();
 }
 
-function renderPag(tot){
-  var pages=Math.ceil(tot/PS);
-  if(pages<=1){document.getElementById('pag').style.display='none';return;}
-  document.getElementById('pag').style.display='flex';
-  document.getElementById('pagi').textContent='Стр. '+PAGE+' из '+pages+' · '+tot+' записей';
-  var h='<button class="pb" onclick="goPg('+(PAGE-1)+')" '+(PAGE<=1?'disabled':'')+'>‹</button>';
-  for(var i=Math.max(1,PAGE-2);i<=Math.min(pages,PAGE+2);i++)h+='<button class="pb '+(i===PAGE?'on':'')+'" onclick="goPg('+i+')">'+i+'</button>';
-  h+='<button class="pb" onclick="goPg('+(PAGE+1)+')" '+(PAGE>=pages?'disabled':'')+'>›</button>';
-  document.getElementById('pagb').innerHTML=h;
-}
-function goPg(pg){PAGE=pg;renderFeed('ff',getFiltered().slice((PAGE-1)*PS,PAGE*PS));renderPag(getFiltered().length);}
+function updateCharts() {
+  const neg = parseInt(document.getElementById('statNeg').textContent) || 0;
+  const pos = parseInt(document.getElementById('statPos').textContent) || 0;
+  const neu = parseInt(document.getElementById('statNeu').textContent) || 0;
+  const total = neg + pos + neu || 1;
 
-function fFeed(t,btn){
-  if(btn){document.querySelectorAll('#s-feed .chip').forEach(function(c){c.classList.remove('on');});btn.classList.add('on');}
-  var sf=document.getElementById('srcF').value;
-  document.querySelectorAll('#ff .post').forEach(function(p){
-    var show=true;
-    if(t==='neg')show=p.dataset.tone==='negative';
-    else if(t==='pos')show=p.dataset.tone==='positive';
-    else if(t==='neu')show=p.dataset.tone==='neutral';
-    else if(t==='src'&&sf)show=p.dataset.src===sf;
-    p.style.display=show?'':'none';
+  document.getElementById('barNeg').style.width = (neg/total*100) + '%';
+  document.getElementById('barNeg').textContent = neg;
+  document.getElementById('barPos').style.width = (pos/total*100) + '%';
+  document.getElementById('barPos').textContent = pos;
+  document.getElementById('barNeu').style.width = (neu/total*100) + '%';
+  document.getElementById('barNeu').textContent = neu;
+
+  // Source chart
+  const sourceCounts = {};
+  allPosts.forEach(p => {
+    sourceCounts[p.source] = (sourceCounts[p.source] || 0) + 1;
+  });
+  const maxCount = Math.max(...Object.values(sourceCounts), 1);
+  const barsHtml = Object.entries(sourceCounts)
+    .sort((a,b) => b[1]-a[1])
+    .map(([src, cnt]) => `
+      <div class="chart-row">
+        <div class="chart-label">${src}</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar" style="width:${cnt/maxCount*100}%; background:var(--accent2);">${cnt}</div>
+        </div>
+      </div>
+    `).join('');
+  document.getElementById('sourceChartBars').innerHTML = barsHtml || '<div style="color:var(--text2);font-size:13px;">Нет данных</div>';
+}
+
+function loadSettings() {
+  fetch('/api/status').then(r => r.json()).then(s => {
+    document.getElementById('settingsStatus').innerHTML = `
+      Статус: <span style="color:var(--pos)">${s.active ? 'АКТИВЕН' : 'ОСТАНОВЛЕН'}</span><br>
+      Постов собрано: ${s.posts_count}<br>
+      Источников: ${s.sources}<br>
+      Уникальных URL: ${s.seen_urls}
+    `;
   });
 }
-function fDash(t,btn){
-  chipOn(btn);
-  document.querySelectorAll('#df .post').forEach(function(p){p.style.display=(t==='all'||p.dataset.tone===t)?'':'none';});
-}
-function search(q){
-  var lq=q.toLowerCase();
-  ['ff','df'].forEach(function(id){document.querySelectorAll('#'+id+' .post').forEach(function(p){p.style.display=(!q||p.textContent.toLowerCase().includes(lq))?'':'none';});});
+
+function refreshData() {
+  fetchData();
 }
 
-// ═══ CHARTS ═══
-function initCharts(){
-  var base={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8a9bb8',font:{size:10},boxWidth:9}},tooltip:{backgroundColor:'#151d30',borderColor:'rgba(255,255,255,.08)',borderWidth:1,titleColor:'#e8edf5',bodyColor:'#8a9bb8'}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a5878',font:{size:9}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a5878',font:{size:9}}}}};
-  var tc=document.getElementById('tChart');
-  if(tc)tChart=new Chart(tc,{type:'line',data:{labels:[],datasets:[{label:'Все',data:[],borderColor:'#0080ff',backgroundColor:'rgba(0,128,255,.1)',borderWidth:2,pointRadius:3,tension:.4,fill:true},{label:'Негатив',data:[],borderColor:'#e53935',backgroundColor:'rgba(229,57,53,.06)',borderWidth:1.5,pointRadius:2,tension:.4,fill:true}]},options:{...base,maintainAspectRatio:false}});
-  var sc=document.getElementById('sChart');
-  if(sc)sChart=new Chart(sc,{type:'doughnut',data:{labels:['Негатив','Нейтрально','Позитив'],datasets:[{data:[0,100,0],backgroundColor:['#e53935','#4a5878','#10b981'],borderWidth:0,hoverOffset:4}]},options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#151d30',borderColor:'rgba(255,255,255,.08)',borderWidth:1}},responsive:false}});
-  var src=document.getElementById('srcChart');
-  if(src)srcChart=new Chart(src,{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:['#0080ff','#f9a825','#10b981','#8b5cf6','#e53935','#f59e0b'],borderRadius:3}]},options:{...base,maintainAspectRatio:false,plugins:{...base.plugins,legend:{display:false}}}});
-  var tn=document.getElementById('toneChart');
-  if(tn)toneChart=new Chart(tn,{type:'line',data:{labels:[],datasets:[{label:'Негатив',data:[],borderColor:'#e53935',backgroundColor:'rgba(229,57,53,.1)',borderWidth:2,tension:.4,fill:true},{label:'Позитив',data:[],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.06)',borderWidth:1.5,tension:.4,fill:true}]},options:{...base,maintainAspectRatio:false}});
-  var hc=document.getElementById('hChart');
-  if(hc)hChart=new Chart(hc,{type:'bar',data:{labels:Array.from({length:24},function(_,i){return i+':00';}),datasets:[{label:'',data:Array(24).fill(0),backgroundColor:'rgba(0,128,255,.35)',borderColor:'#0080ff',borderWidth:1,borderRadius:2}]},options:{...base,maintainAspectRatio:false,plugins:{...base.plugins,legend:{display:false}}}});
-  var dc=document.getElementById('dChart');
-  if(dc)dChart=new Chart(dc,{type:'line',data:{labels:[],datasets:[{label:'Негатив',data:[],borderColor:'#e53935',backgroundColor:'rgba(229,57,53,.1)',borderWidth:2,tension:.4,fill:true},{label:'Позитив',data:[],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.06)',borderWidth:1.5,tension:.4,fill:true},{label:'Нейтрально',data:[],borderColor:'#4a5878',backgroundColor:'rgba(74,85,120,.04)',borderWidth:1,tension:.4,fill:true}]},options:{...base,maintainAspectRatio:false}});
-}
-
-// ═══ EXPORT ═══
-function exportCSV(){
-  var posts=getFiltered();
-  if(!posts.length){toast('Нет данных','e');return;}
-  var h=['ID','Дата','Источник','Канал','Автор','Тональность','Тема','Просмотры','Текст'];
-  var rows=posts.map(function(p){return[p.id||'',p.publication_time?new Date(p.publication_time).toLocaleString('ru-RU'):'',p.source_type||'',p.source_name||'',p.author||'',p.emotional_tone||'',p.matched_keyword||'',p.views_count||0,'"'+(p.text||'').replace(/"/g,'""')+'"'];});
-  var csv='\uFEFF'+[h.join(',')].concat(rows.map(function(r){return r.join(',');})).join('\n');
-  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='KT_MediaScan_'+new Date().toISOString().split('T')[0]+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);
-  toast('✓ Экспорт завершён','s');
-}
-
-// ═══ HELPERS ═══
-function setLive(on){
-  var b=document.getElementById('liveBadge'),d=document.getElementById('liveDot'),t=document.getElementById('liveTxt');
-  b.className='live '+(on?'on':'off');d.className='ldot '+(on?'on':'off');t.textContent=on?'LIVE — работает':'Не запущен';
-}
-function openMod(t,s){document.getElementById('mT').textContent=t;document.getElementById('mS').textContent=s;document.getElementById('mTa').value='';document.getElementById('mOv').classList.add('on');setTimeout(function(){document.getElementById('mTa').focus();},100);}
-function closeMod(){document.getElementById('mOv').classList.remove('on');}
-function submitMod(){var t=document.getElementById('mTa').value.trim();closeMod();if(t)toast('✓ Ответ опубликован под @kazakhtelecom','s');}
-function set(id,val){var e=document.getElementById(id);if(e)e.textContent=val;}
-function fmtN(n){if(!n)return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return String(n);}
-function log(msg){var e=document.getElementById('logEl');if(!e)return;e.textContent+='\n'+new Date().toLocaleTimeString('ru-RU')+' '+msg;e.scrollTop=e.scrollHeight;}
-function toast(msg,t){var e=document.getElementById('tst');e.textContent=msg;e.className='toast '+t+' on';clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('on');},3200);}
+// Init
+fetchData();
+setInterval(fetchData, 60000);
 </script>
 </body>
 </html>
